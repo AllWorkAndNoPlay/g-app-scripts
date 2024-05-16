@@ -1,0 +1,89 @@
+// quickly made script to complete task in allotted time
+
+
+function logProductInfo() {
+  //input
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var data = sheet.getDataRange().getValues();
+
+  //output
+  var output = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("output");
+  //sheet.getSheetByName("output");
+
+  var TargetCount;
+  var ArchiveCount;
+  var nasCount;
+
+  var driveIDLast;
+  var driveNameLast;
+  var OUList =[];
+  Logger.log(data.length)
+  for (var i = 1; i < data.length; i++) { //read the sheet. 
+      //var i = 0; i < data.length; i++
+      //Logger.log('row 0: ' + data[i][0]); //user (who ran command) a
+    //Logger.log('row 1: ' + data[i][1]); //createdTime b
+    //Logger.log('row 2: ' + data[i][2]); //permission.deleted c
+      //Logger.log('row 3: ' + data[i][3]); //permission.domain (domain) d
+      //Logger.log('row driveID: ' + data[i][4]); //id (drive id) E
+      //Logger.log('row DriveName: ' + data[i][5]); //name (name of drive) F
+      //Logger.log('row 6: ' + data[i][6]); //permission.displayName (name of user/or group) G
+      //Logger.log('row 7: ' + data[i][7]); //permission.emailAddress (email address of user/or group) h
+    //Logger.log('row 8: ' + data[i][8]); //permission.id i
+      //Logger.log('row 9: ' + data[i][9]); //permission.permissionDetails.inherited j
+      //Logger.log('row 10: ' + data[i][10]); //permission.permissionDetails.permissionType k
+      //Logger.log('row User OU: ' + data[i][11]); //permission.permissionDetails.permissionType /
+
+    var driveIDCurrent = data[i][1];
+    var userOUCurrent = data[i][8]; 
+    var driveIDName = data[i][2];
+    
+    if (driveIDLast == driveIDCurrent) { //if drive ID the same, then add user OU to list
+      OUList.push(userOUCurrent);
+  
+    } else { // ID no longer the same, prossess list
+      //prosses list
+      if (OUList.length > 0) {
+        //Logger.log(OUList.length);
+        //Logger.log('driveID: '+driveIDLast);
+        //Logger.log(OUList.length);
+        //Logger.log(OUList);
+        for (var j = 0; j < OUList.length; j++) {
+          //Logger.log('count:'+j+' OU: '+OUList[j]);
+          if(OUList[j].indexOf("/target path")>-1){
+            TargetCount += 1;
+            //Logger.log("TargetCount");
+          } else if (OUList[j].indexOf("//Archive path")>-1) {
+            ArchiveCount += 1;
+            //Logger.log("ArchiveCount")
+          } else if (OUList[j].indexOf("N/A")>-1) {
+            nasCount += 1;
+            //Logger.log("nasCount")
+          } 
+        }
+        if (TargetCount==OUList.length)
+        {
+          Logger.log(driveIDLast);
+          output.appendRow([driveIDLast, driveNameLast, 'target']);
+        } else if (TargetCount>0) {
+          //Logger.log("TargetCount>0");
+          if ((TargetCount+ArchiveCount+nasCount)==OUList.length) {
+            Logger.log(driveIDLast);
+            output.appendRow([driveIDLast, driveNameLast, 'target']);
+          }
+        } else {
+          //Logger.log('Not');
+          //Logger.log('driveID: '+driveIDLast);
+        }
+      }
+
+      //start tracking over
+      driveIDLast = driveIDCurrent;
+      driveNameLast = driveIDName;
+      OUList = [];
+      OUList.push(userOUCurrent);
+      TargetCount = 0;
+      ArchiveCount = 0;
+      nasCount = 0;
+    }
+  }
+}

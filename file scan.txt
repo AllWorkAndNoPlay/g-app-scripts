@@ -1,0 +1,45 @@
+// quickly made script to complete task in allotted time
+
+function logProductInfo() {
+  //input
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var data = sheet.getDataRange().getValues();
+
+  //output
+  var output = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("output");
+  //sheet.getSheetByName("output");
+
+  var lookfor = ['pattern1','pattern2'];
+
+var seasonEpisode = new RegExp('[s,S]\\d+[e,E]\\d+') //e01s01
+
+  var driveIDLast;
+  var driveNameLast;
+  var OUList =[];
+  var TargetCount;
+  for (var i = 1; i < data.length; i++) {
+      //var i = 0; i < data.length; i++
+      //Logger.log('row 0: ' + data[i][0]); //user (who ran command) a
+      //Logger.log('row 1: ' + data[i][1]); //createdTime b
+      //Logger.log('row 2: ' + data[i][2]); //permission.deleted c
+      //Logger.log('row 3: ' + data[i][3]); //permission.domain (domain) d
+    //Logger.log('row driveID: ' + data[i][4]); //id (drive id) E
+
+    var fileid = data[i][0];
+    var userid = data[i][2];
+    var fileName = data[i][4];
+
+  //Logger.log(seasonEpisode.test(fileName));
+    for (var j = 0; j < lookfor.length; j++) {
+      if (fileName.indexOf(lookfor[j])>-1) {
+        Logger.log(fileName);
+        output.appendRow([fileName, userid, fileid]);
+        j = lookfor.length;
+      } else if (seasonEpisode.test(fileName)==true) {
+        Logger.log(fileName);
+        j = lookfor.length;
+        output.appendRow([fileName, userid, fileid]);
+      }
+    }
+  }
+}
